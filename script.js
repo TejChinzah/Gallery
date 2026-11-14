@@ -26,14 +26,39 @@ function placeholder(i) {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 210"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs><rect width="200" height="210" fill="url(#g)"/><text x="100" y="115" font-size="64" text-anchor="middle" fill="#fff6ea" opacity=".85">♥</text><text x="100" y="160" font-size="14" text-anchor="middle" fill="#fff6ea" font-family="Georgia,serif" opacity=".9">add photo ${i + 1}</text></svg>`;
   return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
 }
+/* Photos are loaded + decoded + downsized once (with a loading screen),
+   so the gallery itself never stutters while images arrive. */
+const PHOTO_URLS = [];
+function loadOne(i) {
+  return new Promise(res => {
+    const src = CONFIG.photoPath + (i + 1) + CONFIG.photoExt, im = new Image();
+    im.onload = async () => {
+      try { await im.decode(); } catch (e) {}
+      try {
+        const max = 560, s = Math.min(1, max / Math.max(im.naturalWidth, im.naturalHeight));
+        if (s < 1) {
+          const c = document.createElement('canvas');
+          c.width = Math.round(im.naturalWidth * s); c.height = Math.round(im.naturalHeight * s);
+          c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+          const blob = await new Promise((r, x) => c.toBlob(b => b ? r(b) : x(), 'image/jpeg', .85));
+          PHOTO_URLS[i] = URL.createObjectURL(blob);
+        } else PHOTO_URLS[i] = src;
+      } catch (e) { PHOTO_URLS[i] = src; }   // e.g. file:// blocks canvas export -> use original
+      res();
+    };
+    im.onerror = () => { PHOTO_URLS[i] = placeholder(i); res(); };
+    im.src = src;
+  });
+}
+function preloadPhotos(cb) {
+  let done = 0; const n = CONFIG.photoCount;
+  return Promise.all(Array.from({ length: n }, (_, i) => loadOne(i).then(() => cb && cb(++done / n))));
+}
 function photoImg(i) {
-  const idx = i % CONFIG.photoCount;
-  const img = new Image();
-  img.alt = 'Our memory ' + (idx + 1);
-  img.loading = 'lazy';
-  img.decoding = 'async';
+  const idx = i % CONFIG.photoCount, img = new Image();
+  img.alt = 'Our memory ' + (idx + 1); img.decoding = 'async';
   img.onerror = () => { img.onerror = null; img.src = placeholder(idx); };
-  img.src = CONFIG.photoPath + (idx + 1) + CONFIG.photoExt;
+  img.src = PHOTO_URLS[idx] || (CONFIG.photoPath + (idx + 1) + CONFIG.photoExt);
   return img;
 }
 
@@ -58,6 +83,15 @@ function initParticles() {
     ctx.quadraticCurveTo(x, y, x, y + r); ctx.quadraticCurveTo(x, y, x - r, y);
     ctx.quadraticCurveTo(x, y, x, y - r); ctx.fill();
   }
+  const sprites = {};
+  function sprite(c) {            // pre-rendered soft glow, drawn cheaply every frame
+    if (sprites[c]) return sprites[c];
+    const s = document.createElement('canvas'); s.width = s.height = 96;
+    const g = s.getContext('2d'), gr = g.createRadialGradient(48, 48, 0, 48, 48, 48);
+    gr.addColorStop(0, `rgba(${c},.9)`); gr.addColorStop(.7, `rgba(${c},.5)`); gr.addColorStop(1, `rgba(${c},0)`);
+    g.fillStyle = gr; g.fillRect(0, 0, 96, 96);
+    return sprites[c] = s;
+  }
   function make(type, fresh) {
     const p = { type, x: rand(0, w), y: fresh ? rand(0, h) : h + rand(20, 120), ph: rand(0, 6.28), c: COLORS[(Math.random() * COLORS.length) | 0] };
     if (type === 'heart') Object.assign(p, { s: rand(5, 13), vy: rand(.25, .7), sway: rand(10, 30), a: rand(.25, .6) });
@@ -73,22 +107,21 @@ function initParticles() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const k = w < 700 ? .55 : 1;
     parts = [];
-    for (let i = 0; i < 20 * k; i++) parts.push(make('heart', true));
-    for (let i = 0; i < 34 * k; i++) parts.push(make('spark', true));
-    for (let i = 0; i < 14 * k; i++) parts.push(make('bokeh', true));
+    for (let i = 0; i < 14 * k; i++) parts.push(make('heart', true));
+    for (let i = 0; i < 24 * k; i++) parts.push(make('spark', true));
+    for (let i = 0; i < 9 * k; i++) parts.push(make('bokeh', true));
   }
   let t = 0;
   function frame() {
     t++;
     ctx.clearRect(0, 0, w, h);
-    ctx.globalCompositeOperation = 'lighter';
     for (let i = parts.length - 1; i >= 0; i--) {
       const p = parts[i];
       if (p.type === 'bokeh') {
         p.y -= p.vy; p.x += Math.sin(t / 200 + p.ph) * .15;
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-        g.addColorStop(0, `rgba(${p.c},${p.a})`); g.addColorStop(.7, `rgba(${p.c},${p.a * .6})`); g.addColorStop(1, `rgba(${p.c},0)`);
-        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fill();
+        ctx.globalAlpha = p.a * 2.2;
+        ctx.drawImage(sprite(p.c), p.x - p.r, p.y - p.r, p.r * 2, p.r * 2);
+        ctx.globalAlpha = 1;
         if (p.y < -p.r) { p.y = h + p.r; p.x = rand(0, w); }
       } else if (p.type === 'heart') {
         p.y -= p.vy; p.x += Math.sin(t / 60 + p.ph) * .4;
@@ -106,7 +139,6 @@ function initParticles() {
         if (p.life <= 0) parts.splice(i, 1);
       }
     }
-    ctx.globalCompositeOperation = 'source-over';
     requestAnimationFrame(frame);
   }
   resize(); frame();
@@ -234,7 +266,7 @@ function buildFloatingPhotos() {
   const field = $('#photoField'), main = $('#gallery');
   field.innerHTML = '';
   const H = main.scrollHeight, W = innerWidth, small = W < 700;
-  const n = small ? 16 : 28;
+  const n = small ? 11 : 20;
   fps = [];
   for (let i = 0; i < n; i++) {
     const depth = rand(.25, 1);                         // 1 = near, .25 = far
@@ -320,12 +352,23 @@ function initCamera() {
 document.addEventListener('DOMContentLoaded', () => {
   initParticles(); Music.init(); initTransitions();
   if (page === 'landing') initLanding();
-  if (page === 'gallery') initReveals();
 });
-addEventListener('load', () => {
+addEventListener('load', async () => {
+  if (page === 'landing') {   // warm the browser cache while the intro plays
+    setTimeout(() => { for (let i = 0; i < CONFIG.photoCount; i++) new Image().src = CONFIG.photoPath + (i + 1) + CONFIG.photoExt; }, 1500);
+    return;
+  }
   if (page !== 'gallery') return;
+  const bar = $('#loadBar'), txt = $('#loadTxt');
+  const prog = p => { bar.style.width = (p * 100) + '%'; txt.textContent = 'Gathering our memories… ' + Math.round(p * 100) + '%'; };
+  await Promise.all([
+    Promise.race([preloadPhotos(prog), new Promise(r => setTimeout(r, 20000))]),
+    new Promise(r => setTimeout(r, 1300))
+  ]);
   buildFloatingPhotos(); initCamera();
-  let last = innerWidth, rt;
-  addEventListener('scroll', () => requestAnimationFrame(onScroll), { passive: true });
+  let last = innerWidth, rt, tick = false;
+  addEventListener('scroll', () => { if (!tick) { tick = true; requestAnimationFrame(() => { onScroll(); tick = false; }); } }, { passive: true });
   addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (innerWidth !== last) { last = innerWidth; buildFloatingPhotos(); } }, 250); });
+  const L = $('#loader'); L.classList.add('done');
+  setTimeout(() => { L.remove(); initReveals(); }, 800);
 });
