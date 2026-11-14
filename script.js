@@ -8,7 +8,7 @@ const CONFIG = {
   photoCount: 12,          // how many photos you have
   photoPath: 'images/photo',
   photoExt: '.jpg',
-  musicSrc: 'music.mp3',
+  musicSrc: 'music.mp4',
   captions: ['Boss', 'my favorite gal', 'together', 'always you', 'sweet memory', 'Us',
              'pure magic', 'my person', 'golden hour', 'forever yours', 'home', 'my heart']
 };
