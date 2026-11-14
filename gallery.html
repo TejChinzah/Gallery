@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Our Gallery ♥</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Great+Vibes&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="gallery">
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="curtain" aria-hidden="true"><span>♥</span></div>
+<div class="progress" id="progress"></div>
+
+<a href="index.html" class="back-link" data-go>‹ Our Story</a>
+<button class="music-btn" id="musicBtn" aria-label="Play or pause music" title="Music">
+  <span class="eq"><i></i><i></i><i></i><i></i></span>
+  <svg class="ico-play" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+</button>
+
+<main id="gallery">
+  <!-- Floating, parallax photos are generated here by script.js -->
+  <div class="photo-field" id="photoField" aria-hidden="true"></div>
+
+  <section class="gallery-hero">
+    <p class="kicker reveal">our gallery</p>
+    <h1 class="script-title type" data-text="Every moment with you"></h1>
+    <p class="scroll-hint reveal">scroll slowly ↓</p>
+  </section>
+
+  <section class="quote-section">
+    <h2 class="quote huge type" data-text="I miss you"></h2>
+  </section>
+
+  <section class="quote-section">
+    <h2 class="quote type" data-text="You are my favorite hello and my hardest goodbye"></h2>
+  </section>
+
+  <section class="camera-section" id="cameraSection">
+    <p class="quote-small reveal">Some moments are too precious to let go. So we keep them.</p>
+    <div class="camera-stage" id="stage">
+      <div class="flash" id="flash"></div>
+      <div class="camera" id="camera">
+        <svg viewBox="0 0 320 260" role="img" aria-label="Vintage instant camera">
+          <defs>
+            <radialGradient id="lens" cx="40%" cy="35%" r="70%">
+              <stop offset="0" stop-color="#f4b6c2"/><stop offset=".45" stop-color="#7a1c3b"/><stop offset="1" stop-color="#2b0614"/>
+            </radialGradient>
+            <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#f3d79a"/><stop offset="1" stop-color="#b98a3e"/>
+            </linearGradient>
+          </defs>
+          <rect x="44" y="46" width="70" height="30" rx="8" fill="url(#gold)"/>
+          <rect x="206" y="46" width="68" height="30" rx="6" fill="#fff6ea" stroke="#d4a95b" stroke-width="3"/>
+          <circle cx="228" cy="61" r="7" fill="#f3d79a"/><circle cx="252" cy="61" r="7" fill="#f3d79a"/>
+          <circle cx="146" cy="58" r="9" fill="url(#gold)"/>
+          <rect x="10" y="70" width="300" height="170" rx="24" fill="#fff6ea" stroke="#d4a95b" stroke-width="3"/>
+          <rect x="10" y="128" width="300" height="112" rx="24" fill="#5a0f2a"/>
+          <rect x="10" y="128" width="300" height="20" fill="#5a0f2a"/>
+          <rect x="10" y="125" width="300" height="6" fill="url(#gold)"/>
+          <rect x="96" y="64" width="128" height="10" rx="5" fill="#2b0614"/>
+          <circle cx="160" cy="170" r="62" fill="url(#gold)"/>
+          <circle cx="160" cy="170" r="52" fill="#2b0614"/>
+          <circle cx="160" cy="170" r="40" fill="url(#lens)"/>
+          <circle cx="146" cy="156" r="8" fill="#fff" opacity=".55"/>
+          <circle cx="176" cy="186" r="4" fill="#fff" opacity=".3"/>
+          <text x="40" y="196" font-size="28" fill="#f3d79a" font-family="serif">♥</text>
+          <text x="248" y="196" font-size="28" fill="#f3d79a" font-family="serif">♥</text>
+        </svg>
+      </div>
+    </div>
+    <button class="enter-btn small" id="shootBtn" type="button"><span class="shine"></span>Capture another memory</button>
+  </section>
+
+  <section class="quote-section">
+    <h2 class="quote type" data-text="Every love story is beautiful, but ours is my favorite"></h2>
+  </section>
+
+  <section class="quote-section">
+    <h2 class="quote type" data-text="In a sea of people, my eyes will always search for you"></h2>
+  </section>
+
+  <section class="quote-section">
+    <h2 class="quote type" data-text="Home is wherever I am with you"></h2>
+  </section>
+
+  <section class="quote-section finale">
+    <div class="big-heart reveal" aria-hidden="true">♥</div>
+    <h2 class="quote huge type" data-text="Forever, and a day"></h2>
+    <a href="index.html" class="enter-btn small reveal" data-go><span class="shine"></span>Return to the beginning</a>
+  </section>
+
+  <footer class="footer">
+    <span class="made">Made with love by <b>Tej Chinzah</b></span> <span class="heart" aria-hidden="true">♥</span>
+  </footer>
+</main>
+<script src="script.js"></script>
+</body>
+</html>
