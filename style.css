@@ -107,16 +107,16 @@ section{position:relative;z-index:5}
 .finale .enter-btn{margin-top:30px}
 
 /* Scroll reveal */
-.reveal{opacity:0;transform:translateY(40px) scale(.97);filter:blur(8px);transition:opacity 1.2s ease,transform 1.2s cubic-bezier(.2,.7,.2,1),filter 1.2s}
-.reveal.in{opacity:1;transform:none;filter:none}
+.reveal{opacity:0;transform:translateY(40px) scale(.97);transition:opacity 1.2s ease,transform 1.2s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
 
 /* Floating photos: .fp (parallax) > .fp-in (reveal) > .frame (float + fade) */
-.fp{position:absolute;will-change:transform}
+.fp{position:absolute;will-change:transform;backface-visibility:hidden}
 .fp-in{opacity:0;transform:scale(.6) rotate(var(--r0,0deg));transition:opacity 1.6s,transform 1.6s cubic-bezier(.2,.8,.2,1)}
 .fp.in .fp-in{opacity:1;transform:none}
-.frame{background:var(--cream);padding:6% 6% 16%;border-radius:3px;box-shadow:0 14px 40px rgba(20,2,8,.55);
+.frame{background:var(--cream);padding:6% 6% 16%;border-radius:3px;box-shadow:0 8px 22px rgba(20,2,8,.5);
   animation:drift var(--dur,9s) ease-in-out var(--del,0s) infinite alternate,fadePulse var(--fdur,12s) ease-in-out var(--del,0s) infinite alternate;
-  filter:blur(var(--blur,0px))}
+  will-change:transform,opacity}
 .frame img{display:block;width:100%;aspect-ratio:1/1.05;object-fit:cover;background:var(--blush)}
 @keyframes drift{from{transform:translate(-10px,-14px) rotate(calc(var(--rot,0deg) - 3deg))}to{transform:translate(12px,16px) rotate(calc(var(--rot,0deg) + 3deg))}}
 @keyframes fadePulse{from{opacity:var(--o,.8)}45%{opacity:var(--o,.8)}to{opacity:calc(var(--o,.8) * .35)}}
@@ -134,7 +134,7 @@ section{position:relative;z-index:5}
 .polaroid{position:absolute;z-index:1;transform:translate(-50%,0) translate(var(--tx,0px),var(--ty,0px)) rotate(var(--r,0deg));
   transition:transform var(--t,1.4s) cubic-bezier(.3,.8,.3,1)}
 .polaroid.out{z-index:3}
-.pol-in{background:var(--cream);padding:7px 7px 0;border-radius:3px;box-shadow:0 10px 30px rgba(20,2,8,.6);animation:drift 8s ease-in-out infinite alternate;--rot:0deg;
+.pol-in{background:var(--cream);padding:7px 7px 0;border-radius:3px;box-shadow:0 8px 20px rgba(20,2,8,.55);animation:drift 8s ease-in-out infinite alternate;--rot:0deg;
   transition:transform .35s}
 .polaroid:hover .pol-in{transform:scale(1.12);animation-play-state:paused}
 .pol-in img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;background:var(--blush)}
@@ -151,3 +151,12 @@ section{position:relative;z-index:5}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   .title span,.fade-late{opacity:1!important;transform:none!important;filter:none!important}
 }
+
+/* ---------- Loading screen (gallery) ---------- */
+.loader{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  background:radial-gradient(ellipse at 50% 40%,#7a1c3b,var(--night));transition:opacity .8s ease,visibility .8s}
+.loader.done{opacity:0;visibility:hidden}
+.loader-heart{font-size:64px;color:#e8628a;text-shadow:0 0 30px rgba(232,98,138,.9);animation:beat 1.2s infinite}
+.loader p{font-style:italic;color:var(--blush);font-size:20px;text-align:center;padding:0 20px}
+.loader-bar{width:min(260px,70vw);height:3px;border-radius:3px;background:rgba(255,246,234,.15);overflow:hidden}
+.loader-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pink),var(--gold-l));transition:width .3s}
